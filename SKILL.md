@@ -1,6 +1,6 @@
 ---
 name: claude-rules-refactor
-description: "Use when the user wants to restructure, audit, or expand their CLAUDE.md and rules files. Triggers on: 优化claude.md、重构claude.md、更新全局配置、整理规则文件、从会话数据提炼规则、把历史对话写进配置、规则健康检查、规则冲突、跨项目同步规则、session数据优化配置. Modes: (A) restructure CLAUDE.md into modular rule files; (B) mine session history for new rules; (C) audit existing rules for quality issues, conflicts, and cross-project duplication. Use whenever the user mentions improving, auditing, or learning from past sessions to update Claude's behavior config."
+description: "Use when the user wants to restructure, audit, expand, or initialize their CLAUDE.md and rules files. Triggers on: 优化claude.md、重构claude.md、更新全局配置、整理规则文件、从会话数据提炼规则、把历史对话写进配置、规则健康检查、规则冲突、跨项目同步规则、给项目建claude.md、初始化项目配置、这个项目没有claude.md. Modes: (A) restructure CLAUDE.md into modular rule files; (B) mine session history for new rules; (C) audit existing rules for quality issues and conflicts; (D) bootstrap a new project-level CLAUDE.md from scratch. Use whenever the user mentions improving, auditing, learning from past sessions, or setting up Claude config for a project."
 ---
 
 # Claude Rules Refactor Skill
@@ -195,3 +195,60 @@ description: "Use when the user wants to restructure, audit, or expand their CLA
 **4. 询问处理方式**
 
 报告完成后询问：是否要直接修复这些问题，还是先看完再决定？
+
+---
+
+## 模式 D：建立项目级 CLAUDE.md
+
+### 触发信号
+用户说"给这个项目建 claude.md"、"初始化项目配置"、"这个项目没有 claude.md"，或当前项目目录下不存在 `.claude/` 目录。
+
+### 步骤
+
+**1. 探索项目**
+
+并行读取以下信息（只读，不修改）：
+- 项目根目录文件列表（识别技术栈：package.json / pom.xml / go.mod / requirements.txt 等）
+- 现有 README（如果有）
+- git log --oneline -20（了解提交风格和主要贡献者）
+- 现有 `.claude/` 目录（如果已存在，避免覆盖）
+
+**2. 推断项目特征**
+
+根据探索结果识别：
+- 语言和框架（Go / Python / Java / React 等）
+- 测试框架（jest / pytest / testify 等）
+- 构建工具（make / gradle / npm 等）
+- 代码风格线索（从现有代码推断，不猜测）
+
+**3. 输出建议配置**
+
+展示拟写入的内容，格式：
+
+```
+拟创建：
+- {project}/.claude/CLAUDE.md       → 项目入口
+- {project}/.claude/rules/stack.md  → 技术栈规范（语言版本、框架约定）
+- {project}/.claude/rules/workflow.md → 工作流规范（构建、测试、提交）
+
+内容预览：
+[CLAUDE.md]
+...
+[rules/stack.md]
+...
+```
+
+等用户确认后再写入。
+
+**4. 写入文件**
+
+- 只写项目特定的规则，不重复全局 `~/.claude/rules/` 里已有的内容
+- 规则必须具体可验证（参考 references/config-spec.md）
+- 每个规则文件 ≤ 50 行
+- CLAUDE.md 只做引用入口，不堆砌内容
+
+**5. 提示后续**
+
+写入完成后提示：
+- 可以用模式 B 扫描该项目的历史 session，补充项目特定的 feedback
+- 可以用模式 C 对新建的配置做健康检查
